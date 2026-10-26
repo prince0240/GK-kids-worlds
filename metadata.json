@@ -1,0 +1,6 @@
+{
+  "name": "GK Kids World",
+  "description": "Fun, colorful and interactive General Knowledge quizzes for children from LKG to Class 5. Learn, play, answer, win stars and unlock badges!",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
