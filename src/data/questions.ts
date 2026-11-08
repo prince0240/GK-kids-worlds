@@ -6,15 +6,29 @@ import { QUESTIONS_CLASS2 } from './questionsClass2';
 import { QUESTIONS_CLASS3 } from './questionsClass3';
 import { QUESTIONS_CLASS4 } from './questionsClass4';
 import { QUESTIONS_CLASS5 } from './questionsClass5';
+import { ADDITIONAL_QUESTIONS_LKG } from './moreQuestionsLKG';
+import { ADDITIONAL_QUESTIONS_UKG } from './moreQuestionsUKG';
+import { ADDITIONAL_QUESTIONS_CLASS1 } from './moreQuestionsClass1';
+import { ADDITIONAL_QUESTIONS_CLASS2 } from './moreQuestionsClass2';
+import { ADDITIONAL_QUESTIONS_CLASS3 } from './moreQuestionsClass3';
+import { ADDITIONAL_QUESTIONS_CLASS4 } from './moreQuestionsClass4';
+import { ADDITIONAL_QUESTIONS_CLASS5 } from './moreQuestionsClass5';
 
 export const QUESTIONS: Question[] = [
   ...QUESTIONS_LKG,
+  ...ADDITIONAL_QUESTIONS_LKG,
   ...QUESTIONS_UKG,
+  ...ADDITIONAL_QUESTIONS_UKG,
   ...QUESTIONS_CLASS1,
+  ...ADDITIONAL_QUESTIONS_CLASS1,
   ...QUESTIONS_CLASS2,
+  ...ADDITIONAL_QUESTIONS_CLASS2,
   ...QUESTIONS_CLASS3,
+  ...ADDITIONAL_QUESTIONS_CLASS3,
   ...QUESTIONS_CLASS4,
+  ...ADDITIONAL_QUESTIONS_CLASS4,
   ...QUESTIONS_CLASS5,
+  ...ADDITIONAL_QUESTIONS_CLASS5,
 ];
 
 export const CLASS_LEVELS = [
