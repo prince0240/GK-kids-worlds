@@ -26,6 +26,18 @@ export const INITIAL_PROGRESS: UserProgress = {
   hideFromLeaderboard: false,
   language: 'en',
   completedChapterIds: [],
+  questionsPerQuiz: 10,
+  recentlyShownQuestionIds: [],
+};
+
+export const resetQuestionHistory = (): UserProgress => {
+  const current = getSavedProgress();
+  const updated: UserProgress = {
+    ...current,
+    recentlyShownQuestionIds: [],
+  };
+  saveProgress(updated);
+  return updated;
 };
 
 export const getSavedProgress = (): UserProgress => {

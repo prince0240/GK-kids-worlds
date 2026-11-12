@@ -203,6 +203,86 @@ export const ParentDashboard: React.FC<ParentDashboardProps> = ({
         </div>
       </div>
 
+      {/* Quiz Settings & Question Randomization Controller */}
+      <div className="bg-white rounded-3xl p-6 border-3 border-amber-200 shadow-md space-y-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b-2 border-amber-100 pb-4">
+          <div>
+            <div className="text-xs font-bold text-amber-700 uppercase tracking-wider">
+              {lang === 'hi' ? 'क्विज़ प्रणाली कॉन्फ़िगरेशन' : 'Quiz System Settings'}
+            </div>
+            <h2 className="font-['Fredoka','Mukta',sans-serif] text-xl sm:text-2xl font-black text-slate-800">
+              ⚙️ {lang === 'hi' ? 'प्रश्नों की संख्या और दोहराव नियंत्रण' : 'Questions per Quiz & Anti-Repeat Engine'}
+            </h2>
+          </div>
+
+          <div className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-800 border border-purple-200 text-xs font-bold px-3 py-1.5 rounded-full">
+            <span>🎲 Fisher-Yates Shuffle Active</span>
+          </div>
+        </div>
+
+        {/* Setting: Number of questions per quiz */}
+        <div className="space-y-2">
+          <label className="block text-xs font-bold text-slate-700">
+            {lang === 'hi' ? 'प्रति क्विज़ सत्र प्रश्नों की संख्या चुनें:' : 'Select Questions per Quiz Session:'}
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            {[5, 8, 10, 15].map((cnt) => {
+              const isSelected = (progress.questionsPerQuiz || 10) === cnt;
+              return (
+                <button
+                  key={cnt}
+                  onClick={() => {
+                    playSound('click', progress.soundEnabled);
+                    const updated = { ...progress, questionsPerQuiz: cnt };
+                    saveProgress(updated);
+                    onUpdateProgress(updated);
+                  }}
+                  className={`py-3 px-4 rounded-2xl font-['Fredoka',sans-serif] font-black text-base border-2 transition-all active:scale-95 ${
+                    isSelected
+                      ? 'bg-amber-400 border-amber-500 text-amber-950 shadow-md scale-[1.02]'
+                      : 'bg-amber-50/50 border-amber-200 text-slate-700 hover:bg-amber-100'
+                  }`}
+                >
+                  {cnt} {lang === 'hi' ? 'प्रश्न' : 'Questions'}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[11px] text-slate-500 font-medium">
+            {lang === 'hi'
+              ? 'प्रत्येक क्विज़ में पूरे 588 प्रश्नों के बैंक में से इतने प्रश्नों का यादृच्छिक चयन (Fisher-Yates) बिना दोहराव के किया जाएगा।'
+              : 'Each quiz session randomly picks this many unique questions from our 588-question bank without repeats.'}
+          </p>
+        </div>
+
+        {/* Question History Status & Cycle Reset */}
+        <div className="bg-amber-50/70 rounded-2xl p-4 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <div className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+              <span>🔄</span> {lang === 'hi' ? 'प्रश्न दोहराव रोकथाम स्थिति:' : 'Question Anti-Repeat Status:'}
+            </div>
+            <div className="text-xs text-slate-600 font-medium">
+              {lang === 'hi'
+                ? `हाल ही में हल किए गए प्रश्न: ${progress.recentlyShownQuestionIds?.length || 0} / 588 प्रश्न। जब पूरा बैंक हल हो जाता है तो यह चक्र स्वतः नया आरंभ होता है।`
+                : `Questions encountered in active cycle: ${progress.recentlyShownQuestionIds?.length || 0} / 588 questions. Cycles reset automatically when all questions are explored.`}
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              playSound('click', progress.soundEnabled);
+              const updated = { ...progress, recentlyShownQuestionIds: [] };
+              saveProgress(updated);
+              onUpdateProgress(updated);
+            }}
+            className="shrink-0 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs px-3.5 py-2 rounded-xl shadow-xs transition-transform active:scale-95"
+            title="Start a fresh cycle of questions"
+          >
+            🔄 {lang === 'hi' ? 'चक्र अभी रीसेट करें' : 'Reset Question Cycle'}
+          </button>
+        </div>
+      </div>
+
       {/* Safety & Reset Zone */}
       <div className="bg-slate-50 rounded-3xl p-5 border-2 border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>

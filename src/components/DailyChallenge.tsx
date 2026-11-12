@@ -7,6 +7,7 @@ import { playSound } from '../utils/sound';
 import { QuizScreen } from './QuizScreen';
 import { recordDailyChallengeCompleted } from '../utils/storage';
 import { TRANSLATIONS } from '../utils/translations';
+import { shuffleQuestionOptions } from '../utils/quizEngine';
 import confetti from 'canvas-confetti';
 
 interface DailyChallengeProps {
@@ -43,7 +44,7 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({
       return codeA - codeB;
     });
 
-    setDailyQuestions(shuffled.slice(0, 5));
+    setDailyQuestions(shuffled.slice(0, 5).map(q => shuffleQuestionOptions(q)));
   }, [todayStr]);
 
   const handleStartDaily = () => {

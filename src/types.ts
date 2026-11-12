@@ -90,6 +90,8 @@ export interface UserProgress {
   hideFromLeaderboard: boolean;
   language: Language;
   completedChapterIds?: string[];
+  questionsPerQuiz?: number; // Configurable: 5, 8, 10, or 15 questions per quiz
+  recentlyShownQuestionIds?: string[]; // Question history tracking to prevent repeats
 }
 
 export interface LeaderboardEntry {

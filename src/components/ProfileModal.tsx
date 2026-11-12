@@ -128,6 +128,37 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           />
         </div>
 
+        {/* Questions per Quiz Session Setting */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs font-bold text-slate-600">
+              Questions per Quiz:
+            </label>
+            <span className="text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+              {progress.questionsPerQuiz || 10} Questions
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-1.5">
+            {[5, 8, 10, 15].map((cnt) => (
+              <button
+                key={cnt}
+                type="button"
+                onClick={() => {
+                  playSound('click', progress.soundEnabled);
+                  onUpdate({ ...progress, questionsPerQuiz: cnt });
+                }}
+                className={`py-2 rounded-xl text-xs font-bold border transition-all ${
+                  (progress.questionsPerQuiz || 10) === cnt
+                    ? 'bg-amber-400 border-amber-500 text-amber-950 font-black shadow-xs'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-amber-50'
+                }`}
+              >
+                {cnt} Qs
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Action Buttons */}
         <div className="flex gap-2 pt-2">
           <button

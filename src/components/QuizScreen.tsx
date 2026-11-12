@@ -63,6 +63,41 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
   const currentQuestion = rawQuestion ? getLocalizedQuestion(rawQuestion, language) : null;
   const progressPercent = Math.round(((currentIndex) / questions.length) * 100);
 
+  // Auto-advance timer ref
+  const autoNextTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Clean up autoNext timer on unmount or index change
+  useEffect(() => {
+    return () => {
+      if (autoNextTimerRef.current) {
+        clearTimeout(autoNextTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Function to advance to next question or complete quiz
+  const advanceToNext = (updatedRecord = answersRecord, currentScore = score, currentCorrect = correctCount, currentStars = starsEarned, highestStreak = maxStreak) => {
+    stopSpeech();
+    if (autoNextTimerRef.current) {
+      clearTimeout(autoNextTimerRef.current);
+      autoNextTimerRef.current = null;
+    }
+
+    if (currentIndex + 1 < questions.length) {
+      setCurrentIndex((prev) => prev + 1);
+    } else {
+      // Quiz complete!
+      onFinishQuiz({
+        totalQuestions: questions.length,
+        correctAnswers: currentCorrect,
+        score: currentScore,
+        starsEarned: currentStars,
+        maxStreak: highestStreak,
+        answersRecord: updatedRecord,
+      });
+    }
+  };
+
   // Auto speech read-aloud when question loads if on LKG / UKG, or if user triggers
   useEffect(() => {
     // Reset option selection
@@ -105,18 +140,28 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
     ];
     setAnswersRecord(newAnswers);
 
+    let nextScore = score;
+    let nextCorrect = correctCount;
+    let nextStars = starsEarned;
+    let nextMaxStreak = maxStreak;
+
     if (isCorrect) {
       playSound('correct', soundEnabled);
       const newStreak = currentStreak + 1;
       setCurrentStreak(newStreak);
-      if (newStreak > maxStreak) setMaxStreak(newStreak);
+      nextMaxStreak = Math.max(newStreak, maxStreak);
+      setMaxStreak(nextMaxStreak);
 
       // 10 base points + streak bonus!
       const streakBonus = Math.min(newStreak * 5, 25);
       const pointsWon = 10 + streakBonus;
-      setScore((prev) => prev + pointsWon);
-      setCorrectCount((prev) => prev + 1);
-      setStarsEarned((prev) => prev + 1);
+      nextScore = score + pointsWon;
+      nextCorrect = correctCount + 1;
+      nextStars = starsEarned + 1;
+
+      setScore(nextScore);
+      setCorrectCount(nextCorrect);
+      setStarsEarned(nextStars);
 
       setMascotMood('cheering');
       setMascotMessage(
@@ -130,25 +175,18 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
       setMascotMood('encouraging');
       setMascotMessage(t.mascotWrong);
     }
+
+    // Automatically advance to the next question after a brief delay
+    // (1.8s for correct answer, 2.4s for incorrect so the child can read the helpful tip)
+    const delayMs = isCorrect ? 1800 : 2400;
+    autoNextTimerRef.current = setTimeout(() => {
+      advanceToNext(newAnswers, nextScore, nextCorrect, nextStars, nextMaxStreak);
+    }, delayMs);
   };
 
-  const handleNext = () => {
-    playSound('click', soundEnabled);
-    stopSpeech();
-
-    if (currentIndex + 1 < questions.length) {
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      // Quiz complete!
-      onFinishQuiz({
-        totalQuestions: questions.length,
-        correctAnswers: correctCount,
-        score,
-        starsEarned,
-        maxStreak,
-        answersRecord,
-      });
-    }
+  // Immediate skip if child or parent clicks the feedback card to proceed sooner
+  const handleImmediateNext = () => {
+    advanceToNext();
   };
 
   if (!currentQuestion) return null;
@@ -308,14 +346,25 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
               </div>
             </div>
 
-            {/* Next Question Button */}
-            <div className="mt-4 pt-3 border-t border-black/10 flex justify-end">
+            {/* Automatic Transition Indicator */}
+            <div className="mt-3 pt-3 border-t border-black/10 flex items-center justify-between gap-3 text-xs sm:text-sm font-bold">
+              <div className="flex items-center gap-2 text-slate-600">
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+                <span>
+                  {language === 'hi'
+                    ? (currentIndex + 1 === questions.length ? 'परिणाम तैयार हो रहे हैं...' : 'अगला प्रश्न आ रहा है...')
+                    : (currentIndex + 1 === questions.length ? 'Loading results...' : 'Moving to next question...')}
+                </span>
+              </div>
+
+              {/* Quick skip button if child wants to proceed immediately */}
               <button
-                onClick={handleNext}
-                className="w-full sm:w-auto font-['Fredoka','Mukta',sans-serif] font-black text-lg bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3.5 rounded-2xl shadow-[0_5px_0_#065f46] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
+                onClick={handleImmediateNext}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 hover:text-emerald-700 border border-slate-200 shadow-2xs font-extrabold text-xs transition-transform active:scale-95"
+                title="Next"
               >
-                <span>{currentIndex + 1 === questions.length ? t.seeResultsAction : t.nextQuestion}</span>
-                <ArrowRight size={22} />
+                <span>{language === 'hi' ? 'तुरंत आगे बढ़ें' : 'Skip Ahead'}</span>
+                <ArrowRight size={14} />
               </button>
             </div>
           </div>

@@ -23,6 +23,7 @@ import {
 } from './utils/storage';
 import { playSound } from './utils/sound';
 import { TRANSLATIONS } from './utils/translations';
+import { selectQuizQuestions } from './utils/quizEngine';
 
 export default function App() {
   const [progress, setProgress] = useState<UserProgress>(() => getSavedProgress());
@@ -86,8 +87,22 @@ export default function App() {
     if (pool.length < 5) {
       pool = [...QUESTIONS];
     }
-    const shuffled = [...pool].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 10);
+
+    const count = progress.questionsPerQuiz || 10;
+    const { questions: selected, updatedHistoryIds } = selectQuizQuestions({
+      pool,
+      count,
+      recentlyShownIds: progress.recentlyShownQuestionIds || [],
+      shuffleOptions: true,
+    });
+
+    // Update user history so these questions are not repeated until bank is exhausted
+    const updated = {
+      ...progress,
+      recentlyShownQuestionIds: updatedHistoryIds,
+    };
+    setProgress(updated);
+    saveProgress(updated);
 
     setActiveQuizQuestions(selected);
     setActiveQuizClass(targetClass);
@@ -116,8 +131,20 @@ export default function App() {
       matching = [...matching, ...extra];
     }
 
-    const shuffled = [...matching].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 10);
+    const count = progress.questionsPerQuiz || 10;
+    const { questions: selected, updatedHistoryIds } = selectQuizQuestions({
+      pool: matching,
+      count,
+      recentlyShownIds: progress.recentlyShownQuestionIds || [],
+      shuffleOptions: true,
+    });
+
+    const updated = {
+      ...progress,
+      recentlyShownQuestionIds: updatedHistoryIds,
+    };
+    setProgress(updated);
+    saveProgress(updated);
 
     setActiveQuizQuestions(selected);
     setActiveQuizClass(targetClass);
@@ -137,8 +164,20 @@ export default function App() {
       matching = [...matching, ...fallback];
     }
 
-    const shuffled = [...matching].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 10);
+    const count = progress.questionsPerQuiz || 10;
+    const { questions: selected, updatedHistoryIds } = selectQuizQuestions({
+      pool: matching,
+      count,
+      recentlyShownIds: progress.recentlyShownQuestionIds || [],
+      shuffleOptions: true,
+    });
+
+    const updated = {
+      ...progress,
+      recentlyShownQuestionIds: updatedHistoryIds,
+    };
+    setProgress(updated);
+    saveProgress(updated);
 
     const chapterDisplayName =
       lang === 'hi'
